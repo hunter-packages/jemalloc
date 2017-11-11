@@ -2,10 +2,15 @@
 # but it's more useful to remove most of the Windows-isms and just make it a
 # clean CMake infrastructure for Unix platforms.
 
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
-project(jemalloc C)
+cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+# For VERSION, see GetAndParseVersion()
+project(jemalloc LANGUAGES C)
+
+set(JEMALLOC_TOP_DIR "${CMAKE_CURRENT_LIST_DIR}")
+set(JEMALLOC_INC_DIR "${JEMALLOC_TOP_DIR}/include")
+
+option(JEMALLOC_BUILD_TESTS "Build jemalloc tests" OFF)
 
 include(CheckFunctionExists)
 include(CheckSymbolExists)
@@ -19,8 +24,6 @@ include(CTest)
 include(${PROJECT_SOURCE_DIR}/Utilities.cmake)
 include(${PROJECT_SOURCE_DIR}/GetSystemSizes.cmake)
 include(${PROJECT_SOURCE_DIR}/GetSystemAddrBits.cmake)
-
-include_directories(${PROJECT_SOURCE_DIR}/include)
 
 if(POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
@@ -69,26 +72,10 @@ endif()
 
 set(PREFIX $install_prefix)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu11")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wsign-compare")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -g3")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_GNU_SOURCE")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden -O3 -funroll-loops")
-
-if(CMAKE_C_COMPILER_ID MATCHES "Clang")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-tautological-pointer-compare")
-endif()
-
-check_c_compiler_flag("-Wshorten-64-to-32" FLAG_SHORTEN)
-
-if(FLAG_SHORTEN)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wshorten-64-to-32")
-endif()
-
 ##############################################################################
 # Versioning from GIT
 # Defaults
+
 set(jemalloc_version "0.0.0-0-g0000000000000000000000000000000000000000")
 set(jemalloc_version_major 0)
 set(jemalloc_version_minor 0)
@@ -149,7 +136,6 @@ endif()
 if(CMAKE_SYSTEM_NAME MATCHES "powerpc")
     set(HAVE_ALTIVEC 1)
 endif()
-
 
 # If defined, use munmap() to unmap freed chunks, rather than storing them for
 # later reuse.  This is disabled by default on Linux because common sequences
@@ -710,7 +696,7 @@ if(enable-prefixed-jemalloc-library)
     endif()
 endif()
 
-if(CMAKE_BUILD_TYPE MATCHES Debug)
+if(JEMALLOC_BUILD_TESTS)
     enable_testing()
     add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 

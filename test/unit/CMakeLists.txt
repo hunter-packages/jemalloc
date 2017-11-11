@@ -60,7 +60,7 @@ foreach(sourcefile ${UnitTests})
     set(exename "${exename}${install_suffix}")
     add_executable(${exename} ${sourcefile})
     target_include_directories(${exename} PRIVATE ${PROJECT_SOURCE_DIR}/test/include)
-
+    target_include_directories(${exename} PRIVATE "$<BUILD_INTERFACE:${JEMALLOC_INC_DIR}>")
     target_compile_options(${exename} PRIVATE "${C_UNIT_TEST_C_FLAGS}")
 
     set_target_properties(${exename} PROPERTIES COMPILE_DEFINITIONS "${C_UNITETEST_DEFS}")

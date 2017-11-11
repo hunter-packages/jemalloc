@@ -22,9 +22,10 @@ foreach(sourcefile ${TESTS_INTEGRATION})
     add_executable(${exename} ${sourcefile})
 
     target_include_directories(${exename} PRIVATE ${PROJECT_SOURCE_DIR}/test/include)
+    target_include_directories(${exename} PRIVATE "$<BUILD_INTERFACE:${JEMALLOC_INC_DIR}>")    
     target_compile_definitions(${exename} PRIVATE JEMALLOC_INTEGRATION_TEST)
 
-    target_link_libraries(${exename} ${C_TESTLIB_INTEGRATION} ${PROJECT_NAME}-static)
+    target_link_libraries(${exename} ${C_TESTLIB_INTEGRATION} ${PROJECT_NAME})
     target_link_libraries(${exename} pthread)
 
     add_test(NAME ${exename} COMMAND ${exename})
