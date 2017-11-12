@@ -156,6 +156,14 @@ endif()
 # mappings do *not* coalesce/fragment.
 set(JEMALLOC_MAPS_COALESCE 1)
 
+if(WIN32)
+  include_directories(BEFORE ${PROJECT_SOURCE_DIR}/include)
+  include_directories(BEFORE ${PROJECT_SOURCE_DIR}/include/msvc_compat)
+  if(NOT HAVE_INTTYPES_H)
+    include_directories(BEFORE ${PROJECT_SOURCE_DIR}/include/msvc_compat/C99)
+  endif()
+endif()
+
 ##############################################################################
 # Below is everything under HAVE_ATTR
 
@@ -202,9 +210,9 @@ if(HAS_BUILTIN_FFSL)
     set(JEMALLOC_INTERNAL_FFSLL "__builtin_ffsll")
     set(JEMALLOC_INTERNAL_FFSL "__builtin_ffsl")
     set(JEMALLOC_INTERNAL_FFS "__builtin_ffs")
-else()
+elseif(NOT WIN32)
     check_c_source_runs("#include <stdlib.h>
-    #include <stdio.h>
+    #Include <stdio.h>
     #include <strings.h>
     #include <string.h>
     int main() {
@@ -363,10 +371,13 @@ if(with-lg-page)
     set(LG_PAGE ${with-lg-page})
 endif()
 
+message("CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
 if(NOT LG_VADDR)
     if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "aarch64") # maybe "arm64"?
         set(LG_VADDR 48)
     elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64")
+        GetSystemAddrBits(LG_VADDR)
+    elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "AMD64")
         GetSystemAddrBits(LG_VADDR)
     else()
         message(FATAL_ERROR "Undecided number of VADDR bits")

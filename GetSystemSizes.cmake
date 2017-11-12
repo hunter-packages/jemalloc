@@ -37,7 +37,7 @@ int main() {
         SYSTEM_LOGICAL_PROCESSOR_INFORMATION *buffer = 0;
 
         GetSystemInfo(&si);
-        result = si.dwSizes;
+        result = si.dwPageSize;
     #else
         result = sysconf(_SC_PAGESIZE);
     #endif
